@@ -1,0 +1,20 @@
+FINAL QUERY OS AS FOLLOWS:
+
+select tv.p_code as SHIP_CODE,c.p_name as PRODUCT_TYPE, ev.code as ORDER_ENTRY_STATUS, plp.p_name as PRODUCT_NAME,p.p_code as PRODUCT_LEGACY_CODE, sum(oe.p_quantity) as 'sum(quantity)'
+ from  orderentries oe JOIN orders o ON oe.p_order=o.PK
+JOIN enumerationvalues ev ON  o.p_status = ev.PK
+JOIN stocklevels sl ON oe.p_offering=sl.PK JOIN warehouses w ON sl.p_warehouse=w.PK join transportvehicle tv ON w.p_transportvehicle=tv.PK
+JOIN products p ON oe.p_product=p.PK JOIN productslp plp ON plp.ITEMPK=p.PK
+JOIN cat2prodrel cpr ON cpr.targetPK=p.PK JOIN categorieslp c ON cpr.sourcePK=c.ITEMPK
+
+group by tv.p_code,c.p_name,ev.code,plp.p_name, p.p_code
+order by tv.p_code,ev.code,plp.p_name
+
+SIMILAR QUERY:
+select t3.ship_code,t4.product_type,t1.order_entry_Status,t4.product_name,t4.product_legacy_code,sum(quantity) from  cmrc_ods_core.order_entry t1
+inner join (select distinct product_offering_sk,sailing_sk,product_code From cmrc_ods_core.product_offering) t2
+on t1.product_offering_sk = t2.product_offering_sk
+inner join cmrc_ods_core.sailing t3 on t2.sailing_sk = t3.sailing_sk
+inner join cmrc_ods_core.product t4 on 'B-'||t2.product_code = t4.product_legacy_code
+group by t3.ship_code,t4.product_type,t1.order_entry_Status,t4.product_name,t4.product_legacy_code
+order by t3.ship_code,t1.order_entry_Status,t4.product_legacy_code
